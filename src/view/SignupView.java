@@ -47,18 +47,60 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         cancel = new JButton(signupViewModel.CANCEL_BUTTON_LABEL);
         buttons.add(cancel);
 
-        signUp.addActionListener(this);
+        signUp.addActionListener(
+                // This creates an anonymous subclass of ActionListener and instantiates it.
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getSource().equals(signUp)) {
+                            signupController.execute(usernameInputField.getText(),
+                                    String.valueOf(passwordInputField.getPassword()),
+                                    String.valueOf(repeatPasswordInputField.getPassword()));
+                        }
+                    }
+                }
+        );
         cancel.addActionListener(this);
 
-        // This makes a new KeyListener object and makes it listen to keystrokes
-        // in the usernameInputField. We're actually creating an anonymous class
-        // here that is a subclass of KeyListener. Notice how it has access to
-        // instance variables in the enclosing class.
-        usernameInputField.addKeyListener(new KeyListener() {
+        // This makes a new KeyListener implementing class, instantiates it, and
+        // makes it listen to keystrokes in the usernameInputField.
+        //
+        // Notice how it has access to instance variables in the enclosing class!
+        usernameInputField.addKeyListener(
+                new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        SignupState currentState = signupViewModel.getState();
+                        currentState.setUsername(usernameInputField.getText() + e.getKeyChar());
+                        signupViewModel.setState(currentState);
+                    }
+
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                    }
+
+                    @Override
+                    public void keyReleased(KeyEvent e) {}
+                });
+
+        passwordInputField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 SignupState currentState = signupViewModel.getState();
-                currentState.setUsername(usernameInputField.getText());
+                currentState.setPassword(passwordInputField.getText());
+                signupViewModel.setState(currentState);
+            }
+            @Override
+            public void keyPressed(KeyEvent e) {}
+
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+
+        repeatPasswordInputField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                SignupState currentState = signupViewModel.getState();
+                currentState.setRepeatPassword(repeatPasswordInputField.getText());
                 signupViewModel.setState(currentState);
             }
 
@@ -68,25 +110,19 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
             @Override
             public void keyReleased(KeyEvent e) {}
         });
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.add(title);
         this.add(usernameInfo);
         this.add(passwordInfo);
         this.add(repeatPasswordInfo);
         this.add(buttons);
-
     }
 
     /**
      * React to a button click that results in evt.
      */
     public void actionPerformed(ActionEvent evt) {
-        if (evt.getSource().equals(signUp)) {
-            signupController.execute(usernameInputField.getText(),
-                    String.valueOf(passwordInputField.getPassword()),
-                    String.valueOf(repeatPasswordInputField.getPassword()));
-        }
+        System.out.println("Cancel not implemented yet.");
     }
 
     @Override
